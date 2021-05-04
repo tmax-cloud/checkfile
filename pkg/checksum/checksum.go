@@ -19,6 +19,9 @@ const (
 	// FilesDB is a db file path
 	FilesDB = FilesDir + "/checkfile_db"
 
+	// FilesDBChecksum is a file path of db's checksum
+	FilesDBChecksum = FilesDir + "/checkfile_db.sum"
+
 	// TargetFilesEnv is an env. key (comma-separated file path list)
 	TargetFilesEnv = "CHECK_FILES"
 )
@@ -29,7 +32,7 @@ func SaveSumsMap(sums map[string]string) error {
 	s, err := os.Stat(FilesDir)
 	if err != nil {
 		if os.IsNotExist(err) {
-			if err := os.Mkdir(FilesDir, 0644); err != nil {
+			if err := os.Mkdir(FilesDir, 0655); err != nil {
 				return err
 			}
 		} else {
@@ -40,11 +43,17 @@ func SaveSumsMap(sums map[string]string) error {
 		return fmt.Errorf("%s is not a directory", FilesDir)
 	}
 
-	f, err := os.OpenFile(FilesDB, os.O_TRUNC|os.O_CREATE|os.O_RDWR, 0644)
+	// If DB file already exists, stop here
+	if _, err := os.Stat(FilesDB); err == nil {
+		return fmt.Errorf("DB file already exists")
+	}
+
+	// Open DB file
+	dbFile, err := os.OpenFile(FilesDB, os.O_TRUNC|os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		return err
 	}
-	defer func() { _ = f.Close() }()
+	defer func() { _ = dbFile.Close() }()
 
 	var b bytes.Buffer
 
@@ -55,19 +64,59 @@ func SaveSumsMap(sums map[string]string) error {
 		}
 	}
 
-	if _, err := f.Write(b.Bytes()); err != nil {
+	// Save DB file
+	if _, err := dbFile.Write(b.Bytes()); err != nil {
 		return err
 	}
+
+	// Open checksum file
+	sumFile, err := os.OpenFile(FilesDBChecksum, os.O_TRUNC|os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = sumFile.Close() }()
+
+	dbSum, err := CalculateSum(FilesDB)
+	if err != nil {
+		return err
+	}
+
+	// Save checksum file
+	if _, err := sumFile.WriteString(dbSum); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // LoadSumsMap loads sums map from a file
 func LoadSumsMap() (map[string]string, error) {
+	// Open DB file
 	f, err := os.OpenFile(FilesDB, os.O_RDONLY, 0644)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = f.Close() }()
+
+	// Open checksum file
+	sumFile, err := os.OpenFile(FilesDBChecksum, os.O_RDONLY, 0644)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = sumFile.Close() }()
+
+	// Verify DB file's checksum
+	sumBytes, err := ioutil.ReadAll(sumFile)
+	if err != nil {
+		return nil, err
+	}
+	dbSum, err := CalculateSum(FilesDB)
+	if err != nil {
+		return nil, err
+	}
+	if string(sumBytes) != dbSum {
+		return nil, fmt.Errorf("db is tainted")
+	}
 
 	sums := map[string]string{}
 
