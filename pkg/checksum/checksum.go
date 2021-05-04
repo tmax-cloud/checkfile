@@ -160,21 +160,15 @@ func InitSumsDB(files []string) error {
 }
 
 // VerifySums verifies files' checksums
-func VerifySums(files []string) error {
-	list, err := TargetFiles(files)
-	if err != nil {
-		return err
-	}
-
+func VerifySums() error {
 	// Load from a file
 	sums, err := LoadSumsMap()
 	if err != nil {
 		return err
 	}
 
-	// Verify them
-	for _, f := range list {
-		expected := sums[f]
+	// Verify files (only those already in DB)
+	for f, expected := range sums {
 		sum, err := CalculateSum(f)
 		if err != nil {
 			return err

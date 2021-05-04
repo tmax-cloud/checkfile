@@ -11,7 +11,7 @@ func New() *cobra.Command {
 		Use:   "verify ",
 		Short: "verify ",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return checksum.VerifySums(args)
+			return checksum.VerifySums()
 		},
 	}
 	return cmd
