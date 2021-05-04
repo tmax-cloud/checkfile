@@ -7,18 +7,6 @@ on:
       - v*
   pull_request:
 jobs:
-  test_crd:
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: crd test
-        run: make test-crd
-  test_gen:
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: gen test
-        run: make test-gen
   test_verify:
     runs-on: ubuntu-18.04
     steps:
