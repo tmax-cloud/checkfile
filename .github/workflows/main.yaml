@@ -1,0 +1,41 @@
+name: checkfile
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v*
+  pull_request:
+jobs:
+  test_crd:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: crd test
+        run: make test-crd
+  test_gen:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: gen test
+        run: make test-gen
+  test_verify:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: verify test
+        run: make test-verify
+  test_unit:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: unit test
+        run: make test-unit
+  test_lint:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: golangci/golangci-lint-action@v2.2.1
+        with:
+          version: v1.29
+          args: -v -E gofmt -E golint -E gocyclo -E misspell --timeout 1h0m0s
