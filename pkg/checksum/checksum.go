@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 const (
@@ -160,26 +161,35 @@ func InitSumsDB(files []string) error {
 }
 
 // VerifySums verifies files' checksums
-func VerifySums() error {
+func VerifySums() (*VerificationResult, error) {
 	// Load from a file
 	sums, err := LoadSumsMap()
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	isTampered := false
+	var tampered []TamperedFile
 
 	// Verify files (only those already in DB)
 	for f, expected := range sums {
 		sum, err := CalculateSum(f)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		if expected != sum {
-			return fmt.Errorf("file %s is changed (%s -> %s)", f, expected, sum)
+			isTampered = true
+			tampered = append(tampered, TamperedFile{
+				FilePath:     f,
+				OriginalHash: expected,
+				TamperedHash: sum,
+			})
 		}
 	}
 
-	return nil
+	t := time.Now()
+	return &VerificationResult{IsTampered: isTampered, TamperedFiles: tampered, Timestamp: &t}, nil
 }
 
 // CalculateSum calculates a sha1sum of a file
@@ -224,7 +234,7 @@ func TargetFiles(argList []string) ([]string, error) {
 	}
 
 	if len(result) == 0 {
-		return nil, fmt.Errorf("no target files are specified")
+		return nil, fmt.Errorf("no target files are specified, there are neither env %s nor arguments", TargetFilesEnv)
 	}
 	return result, nil
 }
