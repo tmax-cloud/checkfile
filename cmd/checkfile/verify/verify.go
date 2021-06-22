@@ -19,13 +19,14 @@ func New() *cobra.Command {
 				if err2 := WriteStringToFile(err.Error(), outputFileWriter); err2 != nil {
 					panic(err)
 				}
-			} else {
-				if err := WriteToFile(result, outputFileWriter); err != nil {
-					panic(err)
-				}
-				if result.IsTampered {
-					os.Exit(1)
-				}
+				panic(err)
+			}
+
+			if err := WriteToFile(result, outputFileWriter); err != nil {
+				panic(err)
+			}
+			if result.IsTampered {
+				os.Exit(1)
 			}
 		},
 	}
