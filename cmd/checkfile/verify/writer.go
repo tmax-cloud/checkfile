@@ -1,24 +1,46 @@
 package verify
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/cqbqdd11519/checkfile/pkg/checksum"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"path"
+	"strings"
 )
 
-// WriteToFile writes checksum.VerificationResult to the file
-func WriteToFile(result *checksum.VerificationResult, filePath string) error {
+// WriteResult writes checksum.VerificationResult to a file/http
+func WriteResult(result *checksum.VerificationResult, filePath string) error {
 	b, err := json.Marshal(result)
 	if err != nil {
 		return err
 	}
 
-	return WriteStringToFile(string(b), filePath)
+	return WriteString(string(b), "application/json", filePath)
 }
 
-// WriteStringToFile writes a string to the file
-func WriteStringToFile(str string, filePath string) error {
+// WriteString writes a string to the file
+func WriteString(str, contentType string, filePath string) error {
+	// Handle HTTP
+	if strings.HasPrefix(filePath, "http://") || strings.HasPrefix(filePath, "https://") {
+		res, err := http.Post(filePath, contentType, bytes.NewBufferString(str))
+		if err != nil {
+			return err
+		}
+		if res.StatusCode < 200 || res.StatusCode >= 400 {
+			result, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				return err
+			}
+			return fmt.Errorf("error writing error to %s: %d(%s)", filePath, res.StatusCode, string(result))
+		}
+		return nil
+	}
+
+	// Handle file
 	f, err := openFile(filePath)
 	if err != nil {
 		return err
