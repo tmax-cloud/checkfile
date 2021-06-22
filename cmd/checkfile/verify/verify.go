@@ -8,7 +8,7 @@ import (
 
 // New returns a verify command
 func New() *cobra.Command {
-	outputFileWriter := "/dev/stdout"
+	outputDest := "/dev/stdout"
 
 	cmd := &cobra.Command{
 		Use:   "verify ",
@@ -16,13 +16,13 @@ func New() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			result, err := checksum.VerifySums()
 			if err != nil {
-				if err2 := WriteStringToFile(err.Error(), outputFileWriter); err2 != nil {
-					panic(err)
+				if err2 := WriteString(err.Error(), "application/x-www-form-urlencoded", outputDest); err2 != nil {
+					panic(err2)
 				}
 				panic(err)
 			}
 
-			if err := WriteToFile(result, outputFileWriter); err != nil {
+			if err := WriteResult(result, outputDest); err != nil {
 				panic(err)
 			}
 			if result.IsTampered {
@@ -31,7 +31,7 @@ func New() *cobra.Command {
 		},
 	}
 
-	cmd.PersistentFlags().StringVarP(&outputFileWriter, "outputFile", "o", "/dev/stdout", "output file path")
+	cmd.PersistentFlags().StringVarP(&outputDest, "output", "o", "/dev/stdout", "output file path or http endpoint")
 
 	return cmd
 }
