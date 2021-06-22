@@ -3,6 +3,7 @@ package verify
 import (
 	"github.com/cqbqdd11519/checkfile/pkg/checksum"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 // New returns a verify command
@@ -18,9 +19,13 @@ func New() *cobra.Command {
 				if err2 := WriteStringToFile(err.Error(), outputFileWriter); err2 != nil {
 					panic(err)
 				}
-			}
-			if err := WriteToFile(result, outputFileWriter); err != nil {
-				panic(err)
+			} else {
+				if err := WriteToFile(result, outputFileWriter); err != nil {
+					panic(err)
+				}
+				if result.IsTampered {
+					os.Exit(1)
+				}
 			}
 		},
 	}
