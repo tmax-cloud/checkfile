@@ -4,22 +4,34 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/cqbqdd11519/checkfile/pkg/checksum"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/cqbqdd11519/checkfile/pkg/checksum"
 )
 
 // WriteResult writes checksum.VerificationResult to a file/http
-func WriteResult(result *checksum.VerificationResult, filePath string) error {
+func WriteResult(result *checksum.VerificationResult, filePath []string) error {
 	b, err := json.Marshal(result)
 	if err != nil {
 		return err
 	}
 
-	return WriteString(string(b), "application/json", filePath)
+	return WriteStrings(string(b), "application/json", filePath)
+}
+
+// WriteStrings writes a string to the files
+func WriteStrings(str, contentType string, filePaths []string) error {
+	var err error = nil
+	for _, p := range filePaths {
+		if err2 := WriteString(str, contentType, p); err2 != nil {
+			err = err2
+		}
+	}
+	return err
 }
 
 // WriteString writes a string to the file
