@@ -9,25 +9,36 @@ import (
 	"os"
 	"path"
 	"strings"
+	"text/template"
 
 	"github.com/cqbqdd11519/checkfile/pkg/checksum"
 )
 
 // WriteResult writes checksum.VerificationResult to a file/http
-func WriteResult(result *checksum.VerificationResult, filePath []string) error {
+func WriteResult(result *checksum.VerificationResult, filePath, fileTemplates []string) error {
 	b, err := json.Marshal(result)
 	if err != nil {
 		return err
 	}
 
-	return WriteStrings(string(b), "application/json", filePath)
+	return WriteStrings(string(b), "application/json", filePath, fileTemplates)
 }
 
 // WriteStrings writes a string to the files
-func WriteStrings(str, contentType string, filePaths []string) error {
+func WriteStrings(str, contentType string, filePaths, fileTemplates []string) error {
 	var err error = nil
-	for _, p := range filePaths {
-		if err2 := WriteString(str, contentType, p); err2 != nil {
+	for i, p := range filePaths {
+		tmpl, err3 := template.New("body").Parse(fileTemplates[i])
+		if err3 != nil {
+			err = err3
+			continue
+		}
+		var buf bytes.Buffer
+		if err3 := tmpl.Execute(&buf, str); err3 != nil {
+			err = err3
+			continue
+		}
+		if err2 := WriteString(buf.String(), contentType, p); err2 != nil {
 			err = err2
 		}
 	}
