@@ -1,4 +1,4 @@
-module github.com/cqbqdd11519/checkfile
+module github.com/tmax-cloud/checkfile
 
 go 1.14
 

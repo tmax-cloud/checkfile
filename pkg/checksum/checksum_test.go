@@ -1,11 +1,12 @@
 package checksum
 
 import (
-	"github.com/cqbqdd11519/checkfile/internal/utils"
-	"github.com/magiconair/properties/assert"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/magiconair/properties/assert"
+	"github.com/tmax-cloud/checkfile/internal/utils"
 )
 
 func TestTargetFiles(t *testing.T) {

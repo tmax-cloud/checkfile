@@ -1,10 +1,11 @@
 package main
 
 import (
-	initcmd "github.com/cqbqdd11519/checkfile/cmd/checkfile/init"
-	verifycmd "github.com/cqbqdd11519/checkfile/cmd/checkfile/verify"
-	"github.com/spf13/cobra"
 	"log"
+
+	"github.com/spf13/cobra"
+	initcmd "github.com/tmax-cloud/checkfile/cmd/checkfile/init"
+	verifycmd "github.com/tmax-cloud/checkfile/cmd/checkfile/verify"
 )
 
 func main() {
