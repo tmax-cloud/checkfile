@@ -2,9 +2,10 @@ package init
 
 import (
 	"fmt"
-	"github.com/cqbqdd11519/checkfile/pkg/checksum"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
+	"github.com/tmax-cloud/checkfile/pkg/checksum"
 )
 
 // New returns an init command

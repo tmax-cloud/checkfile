@@ -11,7 +11,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/cqbqdd11519/checkfile/pkg/checksum"
+	"github.com/tmax-cloud/checkfile/pkg/checksum"
 )
 
 // WriteResult writes checksum.VerificationResult to a file/http

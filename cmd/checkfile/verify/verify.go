@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cqbqdd11519/checkfile/pkg/checksum"
 	"github.com/spf13/cobra"
+	"github.com/tmax-cloud/checkfile/pkg/checksum"
 )
 
 // New returns a verify command
